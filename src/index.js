@@ -1,5 +1,48 @@
 import axios from "axios";
-function Graph(root_path = '/path-graph') {
+class Response {
+  constructor(res = {
+    data: null,
+    msg: "",
+    status: 0
+  }){
+    this.raw_response = res;
+  }
+  getData(){
+    if(typeof this.raw_response['data'] !== 'undefined'){
+      return this.raw_response.data;
+    }else {
+      return null
+    }
+  }
+
+
+  getMsg(){
+    if(typeof this.raw_response.msg !== 'undefined'){
+      return this.raw_response.msg;
+    }else{
+      return null;
+    }
+  }
+
+  getNetworkErrorMsg(){
+    if(typeof this.raw_response['network_msg'] !== 'undefined'){
+      return this.raw_response.network_msg;
+    }else{
+      return null;
+    }
+  }
+
+
+  getStatus(){
+    if(typeof this.raw_response.status !== 'undefined'){
+      return this.raw_response.status;
+    }else{
+      return 0;
+    }
+  }
+
+}
+export default function Graph(root_path = '/path-graph') {
   this.endpoint = root_path;
   this.page = 1;
   this.auto_link = false;
@@ -113,7 +156,6 @@ function Graph(root_path = '/path-graph') {
     return JSON.stringify(params)
   }
 
-  // /query?fetch=BlogPosts/getAll[title,description,author:Authors/getOne[name]]&id=1
 
   /**
    * @return {string}
@@ -168,10 +210,25 @@ function Graph(root_path = '/path-graph') {
   };
 
   this.axios = axios.create(this.axiosConfig);
-
+  let makeRequest = function (endpoint,params) {
+      return new Promise(async (resolve,reject) => {
+        try {
+          let res = await this.axios.post(endpoint,params);
+          res = res.data;
+          resolve(new Response(res))
+        }catch (e) {
+          let res = {
+            network_msg: e.message,
+            status: e.response.status,
+            ...e.response.data
+          };
+          reject(new Response(res))
+        }
+      });
+  }
   this.get = async function (page = 1) {
     this.page = page;
-    return this.axios.post(this.endpoint,{
+    return  makeRequest(this.endpoint,{
       _____graph: this.toLink(),
       _____method: "GET",
       ...(this.auto_link && {_____auto_link: "yes"})
@@ -183,12 +240,29 @@ function Graph(root_path = '/path-graph') {
       ...this.queryTree.post_params,
       ...values
     };
-    return this.axios.post(this.endpoint,{
+
+    return  makeRequest(this.endpoint,{
       _____graph: this.toLink(),
       _____method: "POST",
       ...this.queryTree.post_params,
       ...(this.auto_link && {_____auto_link: "yes"})
     })
+
+  };
+
+  this.update = async function (values = {}) {
+    this.queryTree.post_params = {
+      ...this.queryTree.post_params,
+      ...values
+    };
+
+    return  makeRequest(this.endpoint,{
+      _____graph: this.toLink(),
+      _____method: "PATCH",
+      ...this.queryTree.post_params,
+      ...(this.auto_link && {_____auto_link: "yes"})
+    })
+
   };
 
 
@@ -202,5 +276,4 @@ function Graph(root_path = '/path-graph') {
 
 }
 
-export default Graph;
 export {Graph}

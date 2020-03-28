@@ -1,42 +1,42 @@
 import axios from "axios";
-class Response {
+export class Response {
   constructor(res = {
     data: null,
     msg: "",
     status: 0
-  }){
+  }) {
     this.raw_response = res;
   }
-  getData(){
-    if(typeof this.raw_response['data'] !== 'undefined'){
+  getData() {
+    if (typeof this.raw_response['data'] !== 'undefined') {
       return this.raw_response.data;
-    }else {
+    } else {
       return null
     }
   }
 
 
-  getMsg(){
-    if(typeof this.raw_response.msg !== 'undefined'){
+  getMsg() {
+    if (typeof this.raw_response.msg !== 'undefined') {
       return this.raw_response.msg;
-    }else{
+    } else {
       return null;
     }
   }
 
-  getNetworkErrorMsg(){
-    if(typeof this.raw_response['network_msg'] !== 'undefined'){
+  getNetworkErrorMsg() {
+    if (typeof this.raw_response['network_msg'] !== 'undefined') {
       return this.raw_response.network_msg;
-    }else{
+    } else {
       return null;
     }
   }
 
 
-  getStatus(){
-    if(typeof this.raw_response.status !== 'undefined'){
+  getStatus() {
+    if (typeof this.raw_response.status !== 'undefined') {
       return this.raw_response.status;
-    }else{
+    } else {
       return 0;
     }
   }
@@ -70,7 +70,7 @@ export default function Graph(root_path = '/path-graph') {
     return this;
   }
 
-  this.Where = function(conditions){
+  this.Where = function (conditions) {
     this.queryTree.filters = {
       ...this.queryTree.filters,
       ...conditions
@@ -78,10 +78,12 @@ export default function Graph(root_path = '/path-graph') {
     return this;
   }
 
-  this.Ref = function(id){
+  this.Ref = function (id) {
     this.queryTree.filters = {
       ...this.queryTree.filters,
-      ...{id}
+      ...{
+        id
+      }
     }
     return this;
   }
@@ -102,7 +104,7 @@ export default function Graph(root_path = '/path-graph') {
   };
   this.fetchOne = function (...columns) {
     this.queryTree.service_method = "getOne";
-    columns = columns.map(column => typeof column == 'string' ? Graph.Column(column):column);
+    columns = columns.map(column => typeof column == 'string' ? Graph.Column(column) : column);
     this.queryTree.columns = [
       ...this.queryTree.columns,
       ...columns
@@ -111,7 +113,7 @@ export default function Graph(root_path = '/path-graph') {
   }
   this.fetchAll = function (...columns) {
     this.queryTree.service_method = "getAll";
-    columns = columns.map(column => typeof column == 'string' ? Graph.Column(column):column);
+    columns = columns.map(column => typeof column == 'string' ? Graph.Column(column) : column);
     this.queryTree.columns = [
       ...this.queryTree.columns,
       ...columns
@@ -120,7 +122,7 @@ export default function Graph(root_path = '/path-graph') {
   }
   this.Func = function (func) {
 
-    if(!func)
+    if (!func)
       throw new Error("Specify fetch method");
 
     this.queryTree.service_method = func;
@@ -141,11 +143,11 @@ export default function Graph(root_path = '/path-graph') {
       type: 'instance',
       method: this.queryTree.service_method,
       service: this.queryTree.service_name,
-      columns:this.queryTree.columns,
-      params:this.queryTree.params,
-      queries:this.queryTree.queries,
-      filters:this.queryTree.filters,
-      post_params:this.queryTree.post_params,
+      columns: this.queryTree.columns,
+      params: this.queryTree.params,
+      queries: this.queryTree.queries,
+      filters: this.queryTree.filters,
+      post_params: this.queryTree.post_params,
       tree: this.queryTree
     }
   }
@@ -160,21 +162,21 @@ export default function Graph(root_path = '/path-graph') {
   /**
    * @return {string}
    */
-  let ColumnToStr = function (root,columns) {
+  let ColumnToStr = function (root, columns) {
     let str = "";
-    if(columns.length){
-      for (let index in columns){
+    if (columns.length) {
+      for (let index in columns) {
         let column = columns[index];
         //  generate params
-        if(column.type === "column"){
-          str += '&'+root+`[${column.name}][type]=column`
-        }else if(column.type === "instance"){
+        if (column.type === "column") {
+          str += '&' + root + `[${column.name}][type]=column`
+        } else if (column.type === "instance") {
           str += `&${root}[${column.name}][type]=service`;
           str += `&${root}[${column.name}][func]=${column.method}`;
           str += `&${root}[${column.name}][service]=${column.service}`;
           str += `&${root}[${column.name}][filters]=${paramsToStr(column.filters)}`;
           str += `&${root}[${column.name}][params]=${paramsToStr(column.params)}`;
-          str += ColumnToStr(`${root}[${column.name}][columns]`,column.columns)
+          str += ColumnToStr(`${root}[${column.name}][columns]`, column.columns)
         }
         //${treeToStr(column.tree)}
       }
@@ -192,47 +194,72 @@ export default function Graph(root_path = '/path-graph') {
     query += `&${queryTree.service_name}[params]=${paramsToStr(queryTree.params)}`;
     query += `&${queryTree.service_name}[filters]=${paramsToStr(queryTree.filters)}`;
     _root = `${queryTree.service_name}[columns]`;
-    query += ColumnToStr(_root,queryTree.columns);
+    query += ColumnToStr(_root, queryTree.columns);
 
     return query;
   };
 
   this.toLink = function () {
     // console.log(JSON.stringify(this.queryTree))
-    if(!this.queryTree.service_name)
+    if (!this.queryTree.service_name)
       throw new Error("Service not specified");
 
-    return treeToStr(this.queryTree,null);
+    return treeToStr(this.queryTree, null);
   };
 
-  this.setAxiosConfig = function(config){
+  this.setAxiosConfig = function (config) {
     this.axiosConfig = config;
   };
 
-  this.axios = axios.create(this.axiosConfig);
-  let makeRequest = function (endpoint,params) {
-      return new Promise(async (resolve,reject) => {
-        try {
-          let res = await this.axios.post(endpoint,params);
-          res = res.data;
-          resolve(new Response(res))
-        }catch (e) {
-          let res = {
-            network_msg: e.message,
-            status: e.response.status,
-            ...e.response.data
-          };
-          reject(new Response(res))
+  let makeRequest = function (endpoint, params, axiosConfig) {
+    const req = axios.create(axiosConfig);
+
+    return new Promise(async (resolve, reject) => {
+      try {
+        let res = await req.post(endpoint, params);
+        res = res.data;
+        resolve(new Response(res))
+      } catch (e) {
+        console.log({
+          e
+        });
+        let res = {
+          data: null,
+          msg: "",
+          status: 0
+        };
+        res = {
+          ...res,
+          network_msg: e.message
+        };
+        if (typeof e.response !== 'undefined') {
+          res = {
+            ...res
+          }
+          //            status: e.response.status,
+          if (typeof e.response.status !== 'undefined') {
+            res['status'] = e.response.status;
+          }
+          if (typeof e.response.data !== 'undefined') {
+            res = {
+              ...res,
+              ...e.response.data
+            }
+          }
         }
-      });
+        reject(new Response(res))
+      }
+    });
   }
   this.get = async function (page = 1) {
     this.page = page;
-    return  makeRequest(this.endpoint,{
+    return makeRequest(this.endpoint, {
       _____graph: this.toLink(),
       _____method: "GET",
-      ...(this.auto_link && {_____auto_link: "yes"})
-    })
+      ...(this.auto_link && {
+        _____auto_link: "yes"
+      })
+    }, this.axiosConfig)
   };
 
   this.set = async function (values = {}) {
@@ -241,12 +268,14 @@ export default function Graph(root_path = '/path-graph') {
       ...values
     };
 
-    return  makeRequest(this.endpoint,{
+    return makeRequest(this.endpoint, {
       _____graph: this.toLink(),
       _____method: "POST",
       ...this.queryTree.post_params,
-      ...(this.auto_link && {_____auto_link: "yes"})
-    })
+      ...(this.auto_link && {
+        _____auto_link: "yes"
+      })
+    }, this.axiosConfig)
 
   };
 
@@ -256,12 +285,14 @@ export default function Graph(root_path = '/path-graph') {
       ...values
     };
 
-    return  makeRequest(this.endpoint,{
+    return makeRequest(this.endpoint, {
       _____graph: this.toLink(),
       _____method: "PATCH",
       ...this.queryTree.post_params,
-      ...(this.auto_link && {_____auto_link: "yes"})
-    })
+      ...(this.auto_link && {
+        _____auto_link: "yes"
+      })
+    }, this.axiosConfig)
 
   };
 
@@ -276,4 +307,6 @@ export default function Graph(root_path = '/path-graph') {
 
 }
 
-export {Graph}
+export {
+  Graph
+}

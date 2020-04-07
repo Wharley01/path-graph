@@ -262,6 +262,17 @@ export default function Graph(root_path = '/path-graph') {
     }, this.axiosConfig)
   };
 
+  this.delete = async function (page = 1) {
+    this.page = page;
+    return makeRequest(this.endpoint, {
+      _____graph: this.toLink(),
+      _____method: "DELETE",
+      ...(this.auto_link && {
+        _____auto_link: "yes"
+      })
+    }, this.axiosConfig)
+  };
+
   this.set = async function (values = {}) {
     this.queryTree.post_params = {
       ...this.queryTree.post_params,

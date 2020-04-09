@@ -1,6 +1,6 @@
 {
   "name": "@__path/graph",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Path-Graph query builder",
   "main": "src/index.js",
   "scripts": {
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Wharley01/PathWatcher.git"
+    "url": "git+https://github.com/Wharley01/path-graph.git"
   },
   "author": "Wharley01",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Wharley01/PathWatcher/issues"
+    "url": "https://github.com/Wharley01/path-graph/issues"
   },
-  "homepage": "https://github.com/Wharley01/PathWatcher#readme",
+  "homepage": "https://github.com/Wharley01/path-graph#readme",
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",

@@ -108,7 +108,7 @@ export default function Graph(root_path = '/path-graph') {
     if (isNaN(page)) {
       throw new Error('Page must be a valid number');
     }
-    this.queryTree.page = page;
+    this.queryTree.page = parseInt(page);
     return this;
   }
 
@@ -162,7 +162,7 @@ export default function Graph(root_path = '/path-graph') {
   }
   this.As = function (alias) {
     this.queryTree.alias = alias;
-    return {
+    let struct = {
       name: alias,
       type: 'instance',
       method: this.queryTree.service_method,
@@ -174,7 +174,8 @@ export default function Graph(root_path = '/path-graph') {
       filters: this.queryTree.filters,
       post_params: this.queryTree.post_params,
       tree: this.queryTree
-    }
+    };
+    return struct
   }
 
 
@@ -217,6 +218,7 @@ export default function Graph(root_path = '/path-graph') {
     query += `${queryTree.service_name}[func]=${queryTree.service_method}`;
     query += `&${queryTree.service_name}[service]=${queryTree.service_name}`;
     query += `&${queryTree.service_name}[type]=service`;
+    query += `&${queryTree.service_name}[page]=${queryTree.page}`;
     query += `&${queryTree.service_name}[params]=${paramsToStr(queryTree.params)}`;
     query += `&${queryTree.service_name}[filters]=${paramsToStr(queryTree.filters)}`;
     _root = `${queryTree.service_name}[columns]`;
@@ -287,8 +289,7 @@ export default function Graph(root_path = '/path-graph') {
     }, this.axiosConfig)
   };
 
-  this.delete = async function (page = 1) {
-    this.page = page;
+  this.delete = async function () {
     return makeRequest(this.endpoint, {
       _____graph: this.toLink(),
       _____method: "DELETE",

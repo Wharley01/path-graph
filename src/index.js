@@ -41,10 +41,25 @@ export class Response {
     }
   }
 
+  getTotalPages() {
+    if (typeof this.raw_response.current_page !== 'undefined') {
+      return this.raw_response.current_page;
+    } else {
+      return 1;
+    }
+  }
+
+  getCurrentPage() {
+    if (typeof this.raw_response.current_page !== 'undefined') {
+      return this.raw_response.current_page;
+    } else {
+      return 1;
+    }
+  }
+
 }
 export default function Graph(root_path = '/path-graph') {
   this.endpoint = root_path;
-  this.page = 1;
   this.auto_link = false;
   this.axiosConfig = {}
   this.queryTree = {
@@ -53,6 +68,7 @@ export default function Graph(root_path = '/path-graph') {
     columns: [],
     alias: null,
     id: null,
+    page: 1,
     params: {},
     queries: {},
     filters: {},
@@ -85,6 +101,14 @@ export default function Graph(root_path = '/path-graph') {
         id
       }
     }
+    return this;
+  }
+
+  this.Page = function (page) {
+    if (isNaN(page)) {
+      throw new Error('Page must be a valid number');
+    }
+    this.queryTree.page = page;
     return this;
   }
 
@@ -143,6 +167,7 @@ export default function Graph(root_path = '/path-graph') {
       type: 'instance',
       method: this.queryTree.service_method,
       service: this.queryTree.service_name,
+      page: this.queryTree.page,
       columns: this.queryTree.columns,
       params: this.queryTree.params,
       queries: this.queryTree.queries,
@@ -174,6 +199,7 @@ export default function Graph(root_path = '/path-graph') {
           str += `&${root}[${column.name}][type]=service`;
           str += `&${root}[${column.name}][func]=${column.method}`;
           str += `&${root}[${column.name}][service]=${column.service}`;
+          str += `&${root}[${column.name}][page]=${column.page}`;
           str += `&${root}[${column.name}][filters]=${paramsToStr(column.filters)}`;
           str += `&${root}[${column.name}][params]=${paramsToStr(column.params)}`;
           str += ColumnToStr(`${root}[${column.name}][columns]`, column.columns)
@@ -251,8 +277,7 @@ export default function Graph(root_path = '/path-graph') {
       }
     });
   }
-  this.get = async function (page = 1) {
-    this.page = page;
+  this.get = async function () {
     return makeRequest(this.endpoint, {
       _____graph: this.toLink(),
       _____method: "GET",

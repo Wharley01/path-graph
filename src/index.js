@@ -128,6 +128,18 @@ export default function Graph() {
   Graph.Col = function (column) {
     return Graph.Column(column)
   };
+
+  this.selectOne = function (...columns) {
+    this.queryTree.service_method = "getOne";
+    this.Fetch(...columns);
+    return this;
+  }
+  this.selectAll = function (...columns) {
+    this.queryTree.service_method = "getAll";
+    this.Fetch(...columns);
+    return this;
+  };
+
   this.getOne = function (...columns) {
     this.queryTree.service_method = "getOne";
     this.Fetch(...columns);

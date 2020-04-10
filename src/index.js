@@ -59,12 +59,12 @@ export class Response {
 
 }
 export default function Graph() {
-  Graph.endpoint =  '/path-graph';
+  Graph.endpoint = '/path-graph';
   this.auto_link = false;
   this.axiosConfig = {}
   this.queryTree = {
     service_name: null,
-    service_method: 'getAll',
+    service_method: null,
     columns: [],
     alias: null,
     id: null,
@@ -128,40 +128,33 @@ export default function Graph() {
   Graph.Col = function (column) {
     return Graph.Column(column)
   };
-  this.fetchOne = function (...columns) {
+  this.getOne = function (...columns) {
     this.queryTree.service_method = "getOne";
-    columns = columns.map(column => typeof column == 'string' ? Graph.Column(column) : column);
-    this.queryTree.columns = [
-      ...this.queryTree.columns,
-      ...columns
-    ];
-    return this;
+    this.Fetch(...columns);
+    return this.get();
   }
-  this.fetchAll = function (...columns) {
+  this.getAll = function (...columns) {
     this.queryTree.service_method = "getAll";
-    columns = columns.map(column => typeof column == 'string' ? Graph.Column(column) : column);
-    this.queryTree.columns = [
-      ...this.queryTree.columns,
-      ...columns
-    ];
-    return this;
-  }
-  this.Func = function (func) {
+    this.Fetch(...columns);
+    return this.get();
+  };
 
+  this.Func = function (func) {
     if (!func)
       throw new Error("Specify fetch method");
-
     this.queryTree.service_method = func;
     return this;
   };
 
   this.Fetch = function (...columns) {
+    columns = columns.map(column => typeof column == 'string' ? Graph.Column(column) : column);
     this.queryTree.columns = [
       ...this.queryTree.columns,
       ...columns
     ];
     return this;
-  }
+  };
+
   this.As = function (alias) {
     this.queryTree.alias = alias;
     let struct = {
@@ -200,7 +193,9 @@ export default function Graph() {
           str += '&' + root + `[${column.name}][type]=column`
         } else if (column.type === "instance") {
           str += `&${root}[${column.name}][type]=service`;
-          str += `&${root}[${column.name}][func]=${column.method}`;
+          if(column.method){
+            str += `&${root}[${column.name}][func]=${column.method}`;
+          }
           str += `&${root}[${column.name}][service]=${column.service}`;
           str += `&${root}[${column.name}][page]=${column.page}`;
           str += `&${root}[${column.name}][filters]=${paramsToStr(column.filters)}`;
@@ -217,7 +212,9 @@ export default function Graph() {
   let treeToStr = function (queryTree, root = null) {
     let query = "";
     let _root = "";
-    query += `${queryTree.service_name}[func]=${queryTree.service_method}`;
+    if(queryTree.service_method){
+      query += `${queryTree.service_name}[func]=${queryTree.service_method}`;
+    }
     query += `&${queryTree.service_name}[service]=${queryTree.service_name}`;
     query += `&${queryTree.service_name}[type]=service`;
     query += `&${queryTree.service_name}[page]=${queryTree.page}`;
@@ -290,6 +287,10 @@ export default function Graph() {
       })
     }, this.axiosConfig)
   };
+
+  this.post = function (values = {}) {
+    return this.set(values);
+  }
 
   this.delete = async function () {
     return makeRequest(Graph.endpoint, {

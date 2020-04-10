@@ -58,8 +58,8 @@ export class Response {
   }
 
 }
-export default function Graph(root_path = '/path-graph') {
-  this.endpoint = root_path;
+export default function Graph() {
+  Graph.endpoint =  '/path-graph';
   this.auto_link = false;
   this.axiosConfig = {}
   this.queryTree = {
@@ -75,6 +75,8 @@ export default function Graph(root_path = '/path-graph') {
     post_params: {},
 
   };
+
+
 
   this.AutoLink = function () {
     this.auto_link = true;
@@ -280,7 +282,7 @@ export default function Graph(root_path = '/path-graph') {
     });
   }
   this.get = async function () {
-    return makeRequest(this.endpoint, {
+    return makeRequest(Graph.endpoint, {
       _____graph: this.toLink(),
       _____method: "GET",
       ...(this.auto_link && {
@@ -290,7 +292,7 @@ export default function Graph(root_path = '/path-graph') {
   };
 
   this.delete = async function () {
-    return makeRequest(this.endpoint, {
+    return makeRequest(Graph.endpoint, {
       _____graph: this.toLink(),
       _____method: "DELETE",
       ...(this.auto_link && {
@@ -305,7 +307,7 @@ export default function Graph(root_path = '/path-graph') {
       ...values
     };
 
-    return makeRequest(this.endpoint, {
+    return makeRequest(Graph.endpoint, {
       _____graph: this.toLink(),
       _____method: "POST",
       ...this.queryTree.post_params,
@@ -322,7 +324,7 @@ export default function Graph(root_path = '/path-graph') {
       ...values
     };
 
-    return makeRequest(this.endpoint, {
+    return makeRequest(Graph.endpoint, {
       _____graph: this.toLink(),
       _____method: "PATCH",
       ...this.queryTree.post_params,

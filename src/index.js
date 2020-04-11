@@ -58,41 +58,41 @@ export class Response {
   }
 
 }
-export default function Graph() {
-  if(!Graph.endpoint){
-    Graph.endpoint = '/path-graph';
-  }
-  Graph.requestConfig = {};
+export default class Graph {
 
-  Graph.setRequestConfig = function (config) {
+  constructor(){
+    this.auto_link = false;
+    this.queryTree = {
+      service_name: null,
+      service_method: null,
+      columns: [],
+      alias: null,
+      id: null,
+      page: 1,
+      params: {},
+      queries: {},
+      filters: {},
+      post_params: {},
+    };
+  }
+
+  static endpoint = '/path-graph';
+
+  static requestConfig = {};
+
+  static setRequestConfig(config) {
     Graph.requestConfig = {
       ...Graph.requestConfig,
       ...config
     };
   };
-  this.auto_link = false;
-  this.queryTree = {
-    service_name: null,
-    service_method: null,
-    columns: [],
-    alias: null,
-    id: null,
-    page: 1,
-    params: {},
-    queries: {},
-    filters: {},
-    post_params: {},
 
-  };
-
-
-
-  this.AutoLink = function () {
+  AutoLink() {
     this.auto_link = true;
     return this;
   }
 
-  this.Service = function (service) {
+  Service(service) {
     service = service.split('/');
 
     this.queryTree.service_name = service[0];
@@ -102,7 +102,7 @@ export default function Graph() {
     return this;
   }
 
-  this.Where = function (conditions) {
+  Where(conditions) {
     this.queryTree.filters = {
       ...this.queryTree.filters,
       ...conditions
@@ -110,7 +110,7 @@ export default function Graph() {
     return this;
   }
 
-  this.Ref = function (id) {
+  Ref(id) {
     this.queryTree.filters = {
       ...this.queryTree.filters,
       ...{
@@ -120,7 +120,7 @@ export default function Graph() {
     return this;
   }
 
-  this.Page = function (page) {
+  Page(page) {
     if (isNaN(page)) {
       throw new Error('Page must be a valid number');
     }
@@ -128,7 +128,7 @@ export default function Graph() {
     return this;
   }
 
-  Graph.Column = function (column) {
+  static Column(column) {
     if (/[^\w_]/.test(column)) {
       throw new Error('Invalid column name');
     }
@@ -139,40 +139,40 @@ export default function Graph() {
     }
   };
 
-  Graph.Col = function (column) {
+  static Col(column) {
     return Graph.Column(column)
   };
 
-  this.selectOne = function (...columns) {
+  selectOne(...columns) {
     this.queryTree.service_method = "getOne";
     this.Fetch(...columns);
     return this;
   }
-  this.selectAll = function (...columns) {
+  selectAll(...columns) {
     this.queryTree.service_method = "getAll";
     this.Fetch(...columns);
     return this;
   };
 
-  this.getOne = function (...columns) {
+  getOne(...columns) {
     this.queryTree.service_method = "getOne";
     this.Fetch(...columns);
     return this.get();
   }
-  this.getAll = function (...columns) {
+  getAll(...columns) {
     this.queryTree.service_method = "getAll";
     this.Fetch(...columns);
     return this.get();
   };
 
-  this.Func = function (func) {
+  Func(func) {
     if (!func)
       throw new Error("Specify fetch method");
     this.queryTree.service_method = func;
     return this;
   };
 
-  this.Fetch = function (...columns) {
+  Fetch(...columns) {
     columns = columns.map(column => typeof column == 'string' ? Graph.Column(column) : column);
     this.queryTree.columns = [
       ...this.queryTree.columns,
@@ -181,7 +181,7 @@ export default function Graph() {
     return this;
   };
 
-  this.As = function (alias) {
+  As(alias) {
     this.queryTree.alias = alias;
     let struct = {
       name: alias,
@@ -201,7 +201,7 @@ export default function Graph() {
 
 
 
-  let paramsToStr = function (params) {
+  #paramsToStr(params) {
     return JSON.stringify(params)
   }
 
@@ -209,7 +209,7 @@ export default function Graph() {
   /**
    * @return {string}
    */
-  let ColumnToStr = function (root, columns) {
+  #ColumnToStr(root, columns) {
     let str = "";
     if (columns.length) {
       for (let index in columns) {
@@ -224,9 +224,9 @@ export default function Graph() {
           }
           str += `&${root}[${column.name}][service]=${column.service}`;
           str += `&${root}[${column.name}][page]=${column.page}`;
-          str += `&${root}[${column.name}][filters]=${paramsToStr(column.filters)}`;
-          str += `&${root}[${column.name}][params]=${paramsToStr(column.params)}`;
-          str += ColumnToStr(`${root}[${column.name}][columns]`, column.columns)
+          str += `&${root}[${column.name}][filters]=${this.#paramsToStr(column.filters)}`;
+          str += `&${root}[${column.name}][params]=${this.#paramsToStr(column.params)}`;
+          str += this.#ColumnToStr(`${root}[${column.name}][columns]`, column.columns)
         }
         //${treeToStr(column.tree)}
       }
@@ -235,7 +235,7 @@ export default function Graph() {
     return str;
   };
 
-  let treeToStr = function (queryTree, root = null) {
+  #treeToStr(queryTree, root = null) {
     let query = "";
     let _root = "";
     if(queryTree.service_method){
@@ -244,24 +244,24 @@ export default function Graph() {
     query += `&${queryTree.service_name}[service]=${queryTree.service_name}`;
     query += `&${queryTree.service_name}[type]=service`;
     query += `&${queryTree.service_name}[page]=${queryTree.page}`;
-    query += `&${queryTree.service_name}[params]=${paramsToStr(queryTree.params)}`;
-    query += `&${queryTree.service_name}[filters]=${paramsToStr(queryTree.filters)}`;
+    query += `&${queryTree.service_name}[params]=${this.#paramsToStr(queryTree.params)}`;
+    query += `&${queryTree.service_name}[filters]=${this.#paramsToStr(queryTree.filters)}`;
     _root = `${queryTree.service_name}[columns]`;
-    query += ColumnToStr(_root, queryTree.columns);
+    query += this.#ColumnToStr(_root, queryTree.columns);
 
     return query;
   };
 
-  this.toLink = function () {
+  toLink() {
     // console.log(JSON.stringify(this.queryTree))
     if (!this.queryTree.service_name)
       throw new Error("Service not specified");
 
-    return treeToStr(this.queryTree, null);
+    return this.#treeToStr(this.queryTree, null);
   };
 
 
-  let makeRequest = function (endpoint, params, requestConfig) {
+  #makeRequest(endpoint, params, requestConfig) {
     const req = axios.create(requestConfig);
 
     return new Promise(async (resolve, reject) => {
@@ -301,8 +301,8 @@ export default function Graph() {
       }
     });
   }
-  this.get = async function () {
-    return makeRequest(Graph.endpoint, {
+  get() {
+    return this.#makeRequest(Graph.endpoint, {
       _____graph: this.toLink(),
       _____method: "GET",
       ...(this.auto_link && {
@@ -311,12 +311,12 @@ export default function Graph() {
     }, Graph.requestConfig)
   };
 
-  this.post = function (values = {}) {
+  post(values = {}) {
     return this.set(values);
   }
 
-  this.delete = async function () {
-    return makeRequest(Graph.endpoint, {
+  async delete() {
+    return this.#makeRequest(Graph.endpoint, {
       _____graph: this.toLink(),
       _____method: "DELETE",
       ...(this.auto_link && {
@@ -325,13 +325,13 @@ export default function Graph() {
     }, Graph.requestConfig)
   };
 
-  this.set = async function (values = {}) {
+  async set(values = {}) {
     this.queryTree.post_params = {
       ...this.queryTree.post_params,
       ...values
     };
 
-    return makeRequest(Graph.endpoint, {
+    return this.#makeRequest(Graph.endpoint, {
       _____graph: this.toLink(),
       _____method: "POST",
       ...this.queryTree.post_params,
@@ -342,13 +342,13 @@ export default function Graph() {
 
   };
 
-  this.update = async function (values = {}) {
+  update(values = {}) {
     this.queryTree.post_params = {
       ...this.queryTree.post_params,
       ...values
     };
 
-    return makeRequest(Graph.endpoint, {
+    return this.#makeRequest(Graph.endpoint, {
       _____graph: this.toLink(),
       _____method: "PATCH",
       ...this.queryTree.post_params,
@@ -360,7 +360,7 @@ export default function Graph() {
   };
 
 
-  this.SetParams = function (params) {
+  SetParams(params) {
     this.queryTree.params = {
       ...this.queryTree.params,
       ...params

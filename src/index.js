@@ -59,9 +59,18 @@ export class Response {
 
 }
 export default function Graph() {
-  Graph.endpoint = '/path-graph';
+  if(!Graph.endpoint){
+    Graph.endpoint = '/path-graph';
+  }
+  Graph.requestConfig = {};
+
+  Graph.setRequestConfig = function (config) {
+    Graph.requestConfig = {
+      ...Graph.requestConfig,
+      ...config
+    };
+  };
   this.auto_link = false;
-  this.axiosConfig = {}
   this.queryTree = {
     service_name: null,
     service_method: null,
@@ -183,7 +192,7 @@ export default function Graph() {
       tree: this.queryTree
     };
     return struct
-  }
+  };
 
 
 
@@ -246,12 +255,9 @@ export default function Graph() {
     return treeToStr(this.queryTree, null);
   };
 
-  this.setAxiosConfig = function (config) {
-    this.axiosConfig = config;
-  };
 
-  let makeRequest = function (endpoint, params, axiosConfig) {
-    const req = axios.create(axiosConfig);
+  let makeRequest = function (endpoint, params, requestConfig) {
+    const req = axios.create(requestConfig);
 
     return new Promise(async (resolve, reject) => {
       try {
@@ -297,7 +303,7 @@ export default function Graph() {
       ...(this.auto_link && {
         _____auto_link: "yes"
       })
-    }, this.axiosConfig)
+    }, Graph.requestConfig)
   };
 
   this.post = function (values = {}) {
@@ -311,7 +317,7 @@ export default function Graph() {
       ...(this.auto_link && {
         _____auto_link: "yes"
       })
-    }, this.axiosConfig)
+    }, Graph.requestConfig)
   };
 
   this.set = async function (values = {}) {
@@ -327,7 +333,7 @@ export default function Graph() {
       ...(this.auto_link && {
         _____auto_link: "yes"
       })
-    }, this.axiosConfig)
+    }, Graph.requestConfig)
 
   };
 
@@ -344,7 +350,7 @@ export default function Graph() {
       ...(this.auto_link && {
         _____auto_link: "yes"
       })
-    }, this.axiosConfig)
+    }, Graph.requestConfig)
 
   };
 

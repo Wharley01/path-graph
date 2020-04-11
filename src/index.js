@@ -74,18 +74,10 @@ export default class Graph {
       filters: {},
       post_params: {},
     };
+
   }
 
-  static endpoint = '/path-graph';
 
-  static requestConfig = {};
-
-  static setRequestConfig(config) {
-    Graph.requestConfig = {
-      ...Graph.requestConfig,
-      ...config
-    };
-  };
 
   AutoLink() {
     this.auto_link = true;
@@ -128,7 +120,7 @@ export default class Graph {
     return this;
   }
 
-  static Column(column) {
+  Graph.Column(column) {
     if (/[^\w_]/.test(column)) {
       throw new Error('Invalid column name');
     }
@@ -139,7 +131,7 @@ export default class Graph {
     }
   };
 
-  static Col(column) {
+  Graph.Col(column) {
     return Graph.Column(column)
   };
 
@@ -260,13 +252,14 @@ export default class Graph {
     return this.#treeToStr(this.queryTree, null);
   };
 
+  axios = axios.create(Graph.requestConfig);
 
-  #makeRequest(endpoint, params, requestConfig) {
-    const req = axios.create(requestConfig);
+
+  #makeRequest(endpoint, params) {
 
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await req.post(endpoint, params);
+        let res = await axios.post(endpoint, params);
         res = res.data;
         resolve(new Response(res))
       } catch (e) {
@@ -308,7 +301,7 @@ export default class Graph {
       ...(this.auto_link && {
         _____auto_link: "yes"
       })
-    }, Graph.requestConfig)
+    })
   };
 
   post(values = {}) {
@@ -322,7 +315,7 @@ export default class Graph {
       ...(this.auto_link && {
         _____auto_link: "yes"
       })
-    }, Graph.requestConfig)
+    })
   };
 
   async set(values = {}) {
@@ -338,7 +331,7 @@ export default class Graph {
       ...(this.auto_link && {
         _____auto_link: "yes"
       })
-    }, Graph.requestConfig)
+    })
 
   };
 
@@ -355,7 +348,7 @@ export default class Graph {
       ...(this.auto_link && {
         _____auto_link: "yes"
       })
-    }, Graph.requestConfig)
+    })
 
   };
 
@@ -369,6 +362,16 @@ export default class Graph {
   };
 
 }
+Graph.endpoint = '/path-graph';
+
+Graph.requestConfig = {};
+
+Graph.setRequestConfig = function(config) {
+  Graph.requestConfig = {
+    ...Graph.requestConfig,
+    ...config
+  };
+};
 
 export {
   Graph

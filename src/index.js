@@ -93,7 +93,12 @@ export default function Graph() {
   }
 
   this.Service = function (service) {
-    this.queryTree.service_name = service;
+    service = service.split('/');
+
+    this.queryTree.service_name = service[0];
+    if(typeof service[1] !== 'undefined'){
+      this.Func(service[1])
+    }
     return this;
   }
 

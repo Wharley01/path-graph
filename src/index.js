@@ -59,9 +59,6 @@ export class Response {
 }
 
 function FormBuild(fields) {
-  console.log({
-    fields
-  })
   let form = new FormData();
   for (let field in fields) {
     if (typeof fields[field] !== 'undefined') {
@@ -69,6 +66,8 @@ function FormBuild(fields) {
       if (value === null)
         continue;
       value = value === false ? 0 : (value === true) ? 1 : value;
+      if (typeof value instanceof Array || typeof value instanceof Object)
+        value = JSON.parse(value);
       form.append(field, value);
     }
   }
@@ -254,7 +253,6 @@ export default function Graph() {
         //${treeToStr(column.tree)}
       }
     }
-
     return str;
   };
 
@@ -283,16 +281,14 @@ export default function Graph() {
     // console.log(JSON.stringify(this.queryTree))
     if (!this.queryTree.service_name) throw new Error("Service not specified");
 
-    return treeToStr(this.queryTree, null);
+    return treeToStr(this.queryTree, null) + (this.auto_link ? '&auto_link=yes' : '');
   };
-  let makeRequest = function (endpoint, params) {
-    console.log({
-      params: formDataToObj(params)
-    })
+  let makeRequest = function (endpoint, method = 'get', params = {}) {
+
     let req = axios.create(Graph.requestConfig);
     return new Promise(async (resolve, reject) => {
       try {
-        let res = await req.post(endpoint, params);
+        let res = await req[method](endpoint, params);
         res = res.data;
         resolve(new Response(res));
       } catch (e) {
@@ -325,16 +321,8 @@ export default function Graph() {
     });
   };
   this.get = async function () {
-    return makeRequest(
-      Graph.endpoint,
-      FormBuild({
-        _____graph: this.toLink(),
-        _____method: "GET",
-        ...(this.auto_link && {
-          _____auto_link: "yes",
-        }),
-      })
-    );
+    let link = Graph.endpoint + '?' + this.toLink()
+    return makeRequest(link, 'get');
   };
 
   this.post = function (values = {}) {
@@ -342,16 +330,9 @@ export default function Graph() {
   };
 
   this.delete = async function () {
-    return makeRequest(
-      Graph.endpoint,
-      FormBuild({
-        _____graph: this.toLink(),
-        _____method: "DELETE",
-        ...(this.auto_link && {
-          _____auto_link: "yes",
-        }),
-      })
-    );
+
+    let link = Graph.endpoint + '?' + this.toLink();
+    return makeRequest(link, 'delete');
   };
 
 
@@ -360,18 +341,8 @@ export default function Graph() {
       ...this.queryTree.post_params,
       ...values,
     };
-
-    return makeRequest(
-      Graph.endpoint,
-      FormBuild({
-        _____graph: this.toLink(),
-        _____method: "POST",
-        ...this.queryTree.post_params,
-        ...(this.auto_link && {
-          _____auto_link: "yes",
-        })
-      })
-    );
+    let link = Graph.endpoint + '?' + this.toLink();
+    return makeRequest(link, 'post', FormBuild(this.queryTree.post_params));
   };
 
   this.update = async function (values = {}) {
@@ -379,18 +350,8 @@ export default function Graph() {
       ...this.queryTree.post_params,
       ...values,
     };
-
-    return makeRequest(
-      Graph.endpoint,
-      FormBuild({
-        _____graph: this.toLink(),
-        _____method: "PATCH",
-        ...this.queryTree.post_params,
-        ...(this.auto_link && {
-          _____auto_link: "yes",
-        }),
-      })
-    );
+    let link = Graph.endpoint + '?' + this.toLink();
+    return makeRequest(link, 'patch', FormBuild(this.queryTree.post_params));
   };
 
   this.params = function (params) {

@@ -3,16 +3,16 @@ import {Graph} from "./index";
 let graph = new Graph('/graph-path');
 
 let Author = new Graph()
-    .Service("Author")
-    .Page(1)
-    .Ref(4)//reference Author by ID
+    .service("Author")
+    .page(1)
+    .ref(4)//reference Author by ID
     .selectOne("name");
 
-let posts = graph.Service("Blog").Ref(1)
-    .Fetch(
+let posts = graph.service("Blog").ref(1)
+    .fetch(
         Graph.Column('title'),
         Graph.Column('author_id'),
-        Author.As('author'),//fetch all authors as author
+        Author.as('author'),//fetch all authors as author
         Graph.Column('body')
     );
 

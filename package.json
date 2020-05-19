@@ -1,6 +1,6 @@
 {
   "name": "@__path/graph",
-  "version": "2.0.10",
+  "version": "2.3.10",
   "description": "Path-Graph query builder",
   "main": "src/index.js",
   "scripts": {
@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "axios": "^0.19.2"
+    "axios": "^0.19.2",
+    "md5": "^2.2.1"
   }
 }

@@ -1,4 +1,5 @@
 import axios from "axios";
+import md5 from "md5"
 export class Response {
   constructor(
     res = {
@@ -66,8 +67,9 @@ function FormBuild(fields) {
       if (value === null)
         continue;
       value = value === false ? 0 : (value === true) ? 1 : value;
-      if (typeof value instanceof Array || typeof value instanceof Object)
-        value = JSON.parse(value);
+      if (value instanceof Array || value instanceof Object){
+        value = JSON.stringify(value);
+      }
       form.append(field, value);
     }
   }
@@ -210,6 +212,10 @@ export default function Graph() {
     };
   };
 
+  this.getCacheHash = function(){
+      return md5(JSON.stringify(this.queryTree));
+  };
+
   let paramsToStr = function (params) {
     return JSON.stringify(params);
   };
@@ -350,8 +356,8 @@ export default function Graph() {
       ...this.queryTree.post_params,
       ...values,
     };
-    let link = Graph.endpoint + '?' + this.toLink();
-    return makeRequest(link, 'patch', FormBuild(this.queryTree.post_params));
+    let link = Graph.endpoint + '?' + this.toLink() + '_method=PATCH';
+    return makeRequest(link, 'post', FormBuild(this.queryTree.post_params));
   };
 
   this.params = function (params) {

@@ -1,5 +1,5 @@
 import axios from "axios";
-import md5 from "md5"
+import {md5} from "pure-md5"
 export class Response {
   constructor(
     res = {
@@ -113,7 +113,7 @@ export default function Graph() {
     id: null,
     page: 1,
     params: {},
-    queries: {},
+    query: null,
     filters: {},
     post_params: {},
   };
@@ -205,7 +205,7 @@ export default function Graph() {
       page: this.queryTree.page,
       columns: this.queryTree.columns,
       params: this.queryTree.params,
-      queries: this.queryTree.queries,
+      query: this.queryTree.query,
       filters: this.queryTree.filters,
       post_params: this.queryTree.post_params,
       tree: this.queryTree,
@@ -243,14 +243,24 @@ export default function Graph() {
           if (column.method) {
             str += `&${root}[${column.name}][func]=${column.method}`;
           }
+          if (column.query) {
+            str += `&${root}[${column.name}][query]=${column.query}`;
+          }
           str += `&${root}[${column.name}][service]=${column.service}`;
           str += `&${root}[${column.name}][page]=${column.page}`;
-          str += `&${root}[${column.name}][filters]=${paramsToStr(
-                        column.filters
-                    )}`;
-          str += `&${root}[${column.name}][params]=${paramsToStr(
-                        column.params
-                    )}`;
+          if(column.query){
+            str += `&${root}[${column.name}][query]=${column.query}`;
+          }
+          if(Object.keys(column.filters).length){
+            str += `&${root}[${column.name}][filters]=${paramsToStr(
+                column.filters
+            )}`;
+          }
+          if(Object.keys(column.params).length){
+            str += `&${root}[${column.name}][params]=${paramsToStr(
+                column.params
+            )}`;
+          }
           str += columnToStr(
             `${root}[${column.name}][columns]`,
             column.columns
@@ -271,15 +281,18 @@ export default function Graph() {
     query += `&${queryTree.service_name}[service]=${queryTree.service_name}`;
     query += `&${queryTree.service_name}[type]=service`;
     query += `&${queryTree.service_name}[page]=${queryTree.page}`;
-    query += `&${queryTree.service_name}[params]=${paramsToStr(
-            queryTree.params
-        )}`;
-    query += `&${queryTree.service_name}[filters]=${paramsToStr(
-            queryTree.filters
-        )}`;
+    if(Object.keys(queryTree.params).length){
+      query += `&${queryTree.service_name}[params]=${paramsToStr(
+          queryTree.params
+      )}`;
+    }
+    if(Object.keys(queryTree.filters).length){
+      query += `&${queryTree.service_name}[filters]=${paramsToStr(
+          queryTree.filters
+      )}`;
+    }
     _root = `${queryTree.service_name}[columns]`;
     query += columnToStr(_root, queryTree.columns);
-
     return query;
   };
 

@@ -3186,6 +3186,11 @@ punycode@^2.1.0:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
+pure-md5@^0.1.9:
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/pure-md5/-/pure-md5-0.1.9.tgz#34286b5d8351866e5ff84dcf90c667f6b7f580b6"
+  integrity sha512-SA/xeqGm/WSx9sup7801Xl8cs2mi5IB6UTCOapWcHc7IeAlMn4k3JBO9aLH+88+JrqqUANhVwX1+Tz3dlvRI+A==
+
 querystring-es3@^0.2.0:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/querystring-es3/-/querystring-es3-0.2.1.tgz#9ec61f79049875707d69414596fd907a4d711e73"

@@ -95,6 +95,14 @@ Graph.Column = function (column) {
   };
 };
 
+Graph.validColOnly = function (column) {
+  if (/[^\w_]/.test(column)) {
+    throw new Error("Invalid column name");
+  }
+
+  return column;
+}
+
 Graph.Col = function (column) {
   return Graph.Column(column);
 };
@@ -156,6 +164,18 @@ export default function Graph() {
       throw new Error("Page must be a valid number");
     }
     this.queryTree.page = parseInt(page);
+    return this;
+  };
+
+
+  this.search = function (col,keyword) {
+    if (!col) {
+      throw new Error("Page must be a valid number");
+    }
+    this.queryTree.query = {
+      col: Graph.validColOnly(col),
+      keyword
+    };
     return this;
   };
 
@@ -249,7 +269,7 @@ export default function Graph() {
           str += `&${root}[${column.name}][service]=${column.service}`;
           str += `&${root}[${column.name}][page]=${column.page}`;
           if(column.query){
-            str += `&${root}[${column.name}][query]=${column.query}`;
+            str += `&${root}[${column.name}][query]=${paramsToStr(column.query)}`;
           }
           if(Object.keys(column.filters).length){
             str += `&${root}[${column.name}][filters]=${paramsToStr(
@@ -284,6 +304,11 @@ export default function Graph() {
     if(Object.keys(queryTree.params).length){
       query += `&${queryTree.service_name}[params]=${paramsToStr(
           queryTree.params
+      )}`;
+    }
+    if(queryTree.query){
+      query += `&${queryTree.service_name}[query]=${paramsToStr(
+          queryTree.query
       )}`;
     }
     if(Object.keys(queryTree.filters).length){

@@ -67,7 +67,7 @@ function FormBuild(fields) {
       if (value === null)
         continue;
       value = value === false ? 0 : (value === true) ? 1 : value;
-      if (value instanceof Array || value instanceof Object){
+      if ((value instanceof Array || value instanceof Object) && !value instanceof File){
         value = JSON.stringify(value);
       }
       form.append(field, value);

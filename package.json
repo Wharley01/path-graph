@@ -1,6 +1,6 @@
 {
   "name": "@__path/graph",
-  "version": "2.7.20",
+  "version": "2.7.30",
   "description": "Path-Graph query builder",
   "main": "src/index.js",
   "scripts": {

@@ -211,7 +211,7 @@ export default function Graph() {
     columns = columns.map((column) =>
       typeof column == "string" ? Graph.Column(column) : column
     );
-    this.queryTree.columns = [...this.queryTree.columns, ...columns];
+    this.queryTree.columns = columns;
     return this;
   };
 
@@ -394,7 +394,7 @@ export default function Graph() {
       ...this.queryTree.post_params,
       ...values,
     };
-    let link = Graph.endpoint + '?' + this.toLink() + '_method=PATCH';
+    let link = Graph.endpoint + '?' + this.toLink() + '&_method=PATCH';
     return makeRequest(link, 'post', FormBuild(this.queryTree.post_params));
   };
 

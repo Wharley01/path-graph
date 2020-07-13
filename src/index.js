@@ -60,6 +60,13 @@ export class Response {
 }
 
 function FormBuild(fields) {
+  let isArray = function(a) {
+    return (!!a) && (a.constructor === Array);
+  };
+
+  let isObject = function(a) {
+    return (!!a) && (a.constructor === Object);
+  };
   let form = new FormData();
   for (let field in fields) {
     if (typeof fields[field] !== 'undefined') {
@@ -67,7 +74,7 @@ function FormBuild(fields) {
       if (value === null)
         continue;
       value = value === false ? 0 : (value === true) ? 1 : value;
-      if ((value instanceof Array || value instanceof Object) && !value instanceof File){
+      if (isArray(value)  ||  isObject(value)){
         value = JSON.stringify(value);
       }
       form.append(field, value);
@@ -96,7 +103,7 @@ Graph.Column = function (column) {
 };
 
 Graph.validColOnly = function (column) {
-  if (/[^\w_]/.test(column)) {
+  if (!/[\w._]+/.test(column)) {
     throw new Error("Invalid column name");
   }
 
@@ -142,20 +149,12 @@ export default function Graph() {
   };
 
   this.where = function (conditions) {
-    this.queryTree.filters = {
-      ...this.queryTree.filters,
-      ...conditions,
-    };
+    this.queryTree.filters = conditions;
     return this;
   };
 
   this.ref = function (id) {
-    this.queryTree.filters = {
-      ...this.queryTree.filters,
-      ...{
-        id,
-      },
-    };
+    this.queryTree.filters.id = id;
     return this;
   };
 

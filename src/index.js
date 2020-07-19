@@ -380,28 +380,19 @@ export default function Graph() {
 
 
   this.set = async function (values = {}) {
-    this.queryTree.post_params = {
-      ...this.queryTree.post_params,
-      ...values,
-    };
+    this.queryTree.post_params = values;
     let link = Graph.endpoint + '?' + this.toLink();
     return makeRequest(link, 'post', FormBuild(this.queryTree.post_params));
   };
 
   this.update = async function (values = {}) {
-    this.queryTree.post_params = {
-      ...this.queryTree.post_params,
-      ...values,
-    };
+    this.queryTree.post_params = values;
     let link = Graph.endpoint + '?' + this.toLink() + '&_method=PATCH';
     return makeRequest(link, 'post', FormBuild(this.queryTree.post_params));
   };
 
   this.params = function (params) {
-    this.queryTree.params = {
-      ...this.queryTree.params,
-      ...params,
-    };
+    this.queryTree.params = params;
     return this;
   };
 }

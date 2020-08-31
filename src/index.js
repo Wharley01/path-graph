@@ -43,8 +43,8 @@ export class Response {
   }
 
   getTotalPages() {
-    if (typeof this.raw_response.current_page !== "undefined") {
-      return this.raw_response.current_page;
+    if (typeof this.raw_response.total_pages !== "undefined") {
+      return this.raw_response.total_pages;
     } else {
       return 1;
     }

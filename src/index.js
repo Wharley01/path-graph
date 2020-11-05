@@ -132,6 +132,8 @@ export default function Graph() {
     filters: {},
     post_params: {},
   };
+  this.last_col = null;
+  this.accumulate = false;
 
   this.autoLink = function () {
     this.auto_link = true;
@@ -149,9 +151,65 @@ export default function Graph() {
   };
 
   this.where = function (conditions) {
-    this.queryTree.filters = conditions;
+    if(typeof conditions == 'object')
+      this.queryTree.filters = conditions;
+    else
+      this.last_col = conditions
     return this;
   };
+
+  this.andWhere = function (conditions) {
+    if(typeof conditions == 'object')
+      this.queryTree.filters = conditions;
+    else
+      this.last_col = conditions
+    this.accumulate = true;
+    return this;
+  };
+
+  this.greaterThan = function (value) {
+    return this.addCustomFilter(value,">")
+  }
+  this.lessThan = function (value) {
+    return this.addCustomFilter(value,"<")
+  }
+  this.equals = function (value) {
+    return this.addCustomFilter(value,"==")
+  }
+  this.isNull = function (value) {
+    return this.addCustomFilter(value,"NULL")
+  }
+  this.isNotNull = function (value) {
+    return this.addCustomFilter(value,"NOTNULL")
+  }
+  this.matches = function (value) {
+    return this.addCustomFilter(value,"MATCHES")
+  }
+  this.isLike = function (value) {
+    return this.addCustomFilter(value,"LIKES")
+  }
+  this.isNotLike = function (value) {
+    return this.addCustomFilter(value,"NOT-LIKES")
+  }
+
+  this.addCustomFilter = function (value,operator) {
+    if(!this.last_col)
+      throw new Error(`Specify column to compare ${value} with`);
+    let filter = {
+      [this.last_col]:{
+        value,
+        operator
+      }
+    }
+    this.queryTree.filters = {
+      ...(this.accumulate ? this.queryTree.filters:null),
+      ...filter
+    }
+    this.last_col = null;
+    this.accumulate = false;
+    return this;
+  }
+
 
   this.ref = function (id) {
     this.queryTree.filters.id = id;

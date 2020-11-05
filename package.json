@@ -1,8 +1,8 @@
 {
   "name": "@__path/graph",
-  "version": "3.0.40",
+  "version": "4.0.40",
   "description": "Path-Graph query builder",
-  "main": "src/index.js",
+  "main": "dist/main.js",
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch"

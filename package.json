@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "pure-md5": "^0.1.9"
   }
 }

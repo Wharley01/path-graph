@@ -6,11 +6,11 @@ Graph.setRequestConfig({
 });
 let graph = new Graph('/graph-path');
 
-// let Author = new Graph()
-//     .service("Seller")
-//     .page(1)
-//     .ref(4)//reference Author by ID
-//     .selectOne("name");
+let Author = new Graph()
+    .service("Seller")
+    .page(1)
+    .ref(4)//reference Author by ID
+    .selectOne("name");
 
 let posts = graph.service("Seller")
     .where('username')
@@ -19,6 +19,7 @@ let posts = graph.service("Seller")
 posts.getAll(
     Graph.Column('username'),
     Graph.Column('instagram_id'),
+    Author.as('')
 ).then(res => console.log(res))
 
 

@@ -18,6 +18,10 @@ export class Response {
     }
   }
 
+  setData(data) {
+    this.raw_response.data = data;
+  }
+
   getMsg() {
     if (typeof this.raw_response.msg !== "undefined") {
       return this.raw_response.msg;
@@ -175,6 +179,9 @@ export default function Graph() {
   }
   this.equals = function (value) {
     return this.addCustomFilter(value,"==")
+  }
+  this.notEquals = function (value) {
+    return this.addCustomFilter(value,"!=")
   }
   this.isNull = function (value) {
     return this.addCustomFilter(value,"NULL")
